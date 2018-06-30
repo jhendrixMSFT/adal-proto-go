@@ -23,7 +23,6 @@ import (
 
 // Token represents the results of one token acquisition operation.
 type Token interface {
-	AuthorizationHeader() string
 	IsExpired() bool
 	Value() string
 }
@@ -36,10 +35,6 @@ type accessToken struct {
 	NotBefore   string `json:"not_before"`
 	Resource    string `json:"resource"`
 	Type        string `json:"token_type"`
-}
-
-func (at accessToken) AuthorizationHeader() string {
-	return fmt.Sprintf("Bearer %s", at.AccessToken)
 }
 
 func (at accessToken) IsExpired() bool {
