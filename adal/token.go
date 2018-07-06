@@ -23,27 +23,36 @@ import (
 
 // Token represents the results of one token acquisition operation.
 type Token interface {
-	IsExpired() bool
+	ExpiresIn() time.Duration
+	ExpiresOn() time.Time
 	Value() string
 }
 
 type accessToken struct {
 	rawResp     *http.Response
 	AccessToken string `json:"access_token"`
-	ExpiresIn   string `json:"expires_in"`
-	ExpiresOn   string `json:"expires_on"`
+	Expiresin   string `json:"expires_in"`
+	Expireson   string `json:"expires_on"`
 	NotBefore   string `json:"not_before"`
 	Resource    string `json:"resource"`
 	Type        string `json:"token_type"`
 }
 
-func (at accessToken) IsExpired() bool {
-	i, err := strconv.ParseInt(at.ExpiresOn, 10, 64)
+func (at accessToken) ExpiresIn() time.Duration {
+	i, err := strconv.ParseInt(at.Expiresin, 10, 64)
+	if err != nil {
+		panic(fmt.Sprintf("failed to parse 'ExpiresIn': %v", err))
+	}
+	return time.Duration(i) * time.Second
+}
+
+func (at accessToken) ExpiresOn() time.Time {
+	i, err := strconv.ParseInt(at.Expireson, 10, 64)
 	if err != nil {
 		panic(fmt.Sprintf("failed to parse 'ExpiresOn': %v", err))
 	}
 	t := time.Unix(i, 0)
-	return time.Now().After(t)
+	return t
 }
 
 func (at accessToken) Response() *http.Response {
